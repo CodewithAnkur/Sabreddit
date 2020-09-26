@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">SabReddits v1.0</string>
+    <string name="share">SHARE</string>
+    <string name="meme">meme</string>
+    <string name="next">next</string>
+    <string name="NSFW">nsfw</string>
+</resources>
