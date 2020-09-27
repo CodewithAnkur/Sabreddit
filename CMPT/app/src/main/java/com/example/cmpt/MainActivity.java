@@ -26,8 +26,10 @@ import android.os.Environment;
 import android.os.StrictMode;
 import android.text.InputType;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -59,16 +61,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 
-
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements GestureDetector.OnGestureListener {
 
     ImageView iv;
     ProgressBar progressBar;
-    String s,n;
+    String s, n,r;
     Button nxtcust;
-    Integer counter=0;
+    Integer counter = 0;
+    private GestureDetector gestureDetector;
 
     private static final String TAG = "MainActivity";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,17 +79,15 @@ public class MainActivity extends AppCompatActivity {
 
         deleteCache();
 
-        iv=(ImageView) findViewById(R.id.memeimageView);
-        progressBar=(ProgressBar)findViewById(R.id.progressbar);
-        nxtcust=(Button)findViewById(R.id.nextbutton);
-
-
+        iv = (ImageView) findViewById(R.id.memeimageView);
+        progressBar = (ProgressBar) findViewById(R.id.progressbar);
+        nxtcust = (Button) findViewById(R.id.nextbutton);
 
 
         loadmeme();
 
-        if(counter==0){
-           nxtcust.setEnabled(false);
+        if (counter == 0) {
+            nxtcust.setEnabled(false);
         }
         nxtcust.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -96,64 +97,16 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-
-
-
+        gestureDetector = new GestureDetector(this);
     }
 
-    public void deleteCache(){
+    public void deleteCache() {
         FileUtils.deleteQuietly(this.getCacheDir());
     }
 
-    public void loadnsfw(){
+    public void loadnsfw() {
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url ="https://meme-api.herokuapp.com/gimme/nsfw";
-        progressBar.setVisibility(View.VISIBLE);
-
-// Request a string response from the provided URL.
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        try {
-                             String url = response.getString("url");
-                             s=url;
-                            Glide.with(MainActivity.this).load(url).listener(new RequestListener<Drawable>() {
-                                @Override
-                                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                                    progressBar.setVisibility(View.GONE);
-                                    return false;
-                                }
-                                @Override
-                                public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                                    progressBar.setVisibility(View.GONE);
-                                    return false;
-                                }
-                            }).into(iv);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-
-            }
-        });
-
-// Add the request to the RequestQueue.
-        queue.add(jsonObjectRequest);
-    }
-
-
-
-
-
-
-    public void loadmeme(){
-        RequestQueue queue = Volley.newRequestQueue(this);
-        String url ="https://meme-api.herokuapp.com/gimme/dankmemes";
+        String url = "https://meme-api.herokuapp.com/gimme/nsfw";
         progressBar.setVisibility(View.VISIBLE);
 
 // Request a string response from the provided URL.
@@ -164,13 +117,14 @@ public class MainActivity extends AppCompatActivity {
                     public void onResponse(JSONObject response) {
                         try {
                             String url = response.getString("url");
-                            s=url;
+                            s = url;
                             Glide.with(MainActivity.this).load(url).listener(new RequestListener<Drawable>() {
                                 @Override
                                 public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                                     progressBar.setVisibility(View.GONE);
                                     return false;
                                 }
+
                                 @Override
                                 public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
                                     progressBar.setVisibility(View.GONE);
@@ -185,6 +139,8 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error) {
 
+                        Toast.makeText(MainActivity.this, "Cant Load Image.... Try Again", Toast.LENGTH_SHORT).show();
+                        progressBar.setVisibility(View.GONE);
                     }
                 });
 
@@ -192,9 +148,10 @@ public class MainActivity extends AppCompatActivity {
         queue.add(jsonObjectRequest);
     }
 
-    public void loadcust(){
+
+    public void loadmeme() {
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url ="https://meme-api.herokuapp.com/gimme/"+n;
+        String url = "https://meme-api.herokuapp.com/gimme/dankmemes";
         progressBar.setVisibility(View.VISIBLE);
 
 // Request a string response from the provided URL.
@@ -205,13 +162,58 @@ public class MainActivity extends AppCompatActivity {
                     public void onResponse(JSONObject response) {
                         try {
                             String url = response.getString("url");
-                            s=url;
+                            s = url;
                             Glide.with(MainActivity.this).load(url).listener(new RequestListener<Drawable>() {
                                 @Override
                                 public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                                     progressBar.setVisibility(View.GONE);
                                     return false;
                                 }
+
+                                @Override
+                                public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                                    progressBar.setVisibility(View.GONE);
+                                    return false;
+                                }
+                            }).into(iv);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(MainActivity.this, "Cant Load Image.... Try Again", Toast.LENGTH_SHORT).show();
+                        progressBar.setVisibility(View.GONE);
+                    }
+                });
+
+// Add the request to the RequestQueue.
+        queue.add(jsonObjectRequest);
+        r="meme";
+    }
+
+    public void loadcust() {
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String url = "https://meme-api.herokuapp.com/gimme/" + n;
+        progressBar.setVisibility(View.VISIBLE);
+
+// Request a string response from the provided URL.
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
+                (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            String url = response.getString("url");
+                            s = url;
+                            Glide.with(MainActivity.this).load(url).listener(new RequestListener<Drawable>() {
+                                @Override
+                                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                                    progressBar.setVisibility(View.GONE);
+                                    return false;
+                                }
+
                                 @Override
                                 public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
                                     progressBar.setVisibility(View.GONE);
@@ -233,11 +235,8 @@ public class MainActivity extends AppCompatActivity {
 
 // Add the request to the RequestQueue.
         queue.add(jsonObjectRequest);
+        r="cust";
     }
-
-
-
-
 
 
     public Uri getLocalBitmapUri(ImageView imageView) {
@@ -246,7 +245,7 @@ public class MainActivity extends AppCompatActivity {
         Bitmap bmp = null;
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
-        if (drawable instanceof BitmapDrawable){
+        if (drawable instanceof BitmapDrawable) {
             bmp = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
         } else {
             return null;
@@ -254,7 +253,7 @@ public class MainActivity extends AppCompatActivity {
         // Store image to default external storage directory
         Uri bmpUri = null;
         try {
-            File file =  new File(Environment.getExternalStoragePublicDirectory(
+            File file = new File(Environment.getExternalStoragePublicDirectory(
                     Environment.DIRECTORY_DOWNLOADS), "share_image_" + System.currentTimeMillis() + ".png");
             file.getParentFile().mkdirs();
             FileOutputStream out = new FileOutputStream(file);
@@ -268,45 +267,41 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public  boolean isReadStoragePermissionGranted() {
+    public boolean isReadStoragePermissionGranted() {
         if (Build.VERSION.SDK_INT >= 23) {
             if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
                     == PackageManager.PERMISSION_GRANTED) {
-                Log.v(TAG,"Permission is granted1");
+                Log.v(TAG, "Permission is granted1");
                 return true;
             } else {
 
-                Log.v(TAG,"Permission is revoked1");
+                Log.v(TAG, "Permission is revoked1");
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 3);
                 return false;
             }
-        }
-        else { //permission is automatically granted on sdk<23 upon installation
-            Log.v(TAG,"Permission is granted1");
+        } else { //permission is automatically granted on sdk<23 upon installation
+            Log.v(TAG, "Permission is granted1");
             return true;
         }
     }
 
-    public  boolean isWriteStoragePermissionGranted() {
+    public boolean isWriteStoragePermissionGranted() {
         if (Build.VERSION.SDK_INT >= 23) {
             if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     == PackageManager.PERMISSION_GRANTED) {
-                Log.v(TAG,"Permission is granted2");
+                Log.v(TAG, "Permission is granted2");
                 return true;
             } else {
 
-                Log.v(TAG,"Permission is revoked2");
+                Log.v(TAG, "Permission is revoked2");
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 2);
                 return false;
             }
-        }
-        else { //permission is automatically granted on sdk<23 upon installation
-            Log.v(TAG,"Permission is granted2");
+        } else { //permission is automatically granted on sdk<23 upon installation
+            Log.v(TAG, "Permission is granted2");
             return true;
         }
     }
-
-
 
 
     public void sharememe(View view) {
@@ -344,7 +339,7 @@ public class MainActivity extends AppCompatActivity {
 
 
                 final EditText input = new EditText(this);
-                input.setInputType(InputType.TYPE_CLASS_TEXT );
+                input.setInputType(InputType.TYPE_CLASS_TEXT);
                 builder.setView(input);
 
 // Set up the buttons
@@ -354,7 +349,7 @@ public class MainActivity extends AppCompatActivity {
                         n = input.getText().toString();
                         loadcust();
                         counter++;
-                        if(counter==1){
+                        if (counter == 1) {
                             nxtcust.setEnabled(true);
                         }
                     }
@@ -377,6 +372,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
     }
+
     public void nextmeme(View view) {
         loadmeme();
     }
@@ -386,6 +382,112 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    @Override
+    public boolean onDown(MotionEvent motionEvent) {
+        return false;
+    }
 
+    @Override
+    public void onShowPress(MotionEvent motionEvent) {
+
+    }
+
+    @Override
+    public boolean onSingleTapUp(MotionEvent motionEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onScroll(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
+        return false;
+    }
+
+    @Override
+    public void onLongPress(MotionEvent motionEvent) {
+
+    }
+
+    @Override
+    public boolean onFling(MotionEvent downEvent, MotionEvent moveEvent, float velocityX, float velocityY) {
+        boolean result = false;
+        final int SWIPE_THRESHOLD = 100;
+        final int SWIPE_VELOCITY_THRESHOLD = 100;
+        float diffY = moveEvent.getY() - downEvent.getY();
+        float diffX = moveEvent.getX() - downEvent.getX();
+        // which was greater?  movement across Y or X?
+        if (Math.abs(diffX) > Math.abs(diffY)) {
+            // right or left swipe
+            if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
+                if (diffX > 0) {
+                    onSwipeRight();
+                } else {
+                    onSwipeLeft();
+                }
+                result = true;
+            }
+        } else {
+            // up or down swipe
+            if (Math.abs(diffY) > SWIPE_THRESHOLD && Math.abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
+                if (diffY > 0) {
+                    onSwipeBottom();
+                } else {
+                    onSwipeTop();
+                }
+                result = true;
+            }
+        }
+
+        return result;
+    }
+
+    private void onSwipeTop() {
+        Toast.makeText(this, "Share image...", Toast.LENGTH_SHORT).show();
+        isReadStoragePermissionGranted();
+        isWriteStoragePermissionGranted();
+
+        Uri bmpUri = getLocalBitmapUri(iv);
+        if (bmpUri != null) {
+            // Construct a ShareIntent with link to image
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.setType("image/*");
+            shareIntent.putExtra(Intent.EXTRA_STREAM, bmpUri);
+            // Launch sharing dialog for image
+            startActivity(Intent.createChooser(shareIntent, "Share Image"));
+        } else {
+            System.out.println(" ...sharing failed, handle error");
+        }
+    }
+
+    private void onSwipeBottom() {
+        Toast.makeText(this, "Swipe Bottom", Toast.LENGTH_LONG).show();
+        isWriteStoragePermissionGranted();
+
+        Uri bmpUri = getLocalBitmapUri(iv);
+        if (bmpUri != null) {
+            // Construct a ShareIntent with link to image
+            Toast.makeText(this, "Image Saved in Downloads Folder", Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(this, "Image Download Failed", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void onSwipeLeft() {
+        Toast.makeText(this, "Back To Memes", Toast.LENGTH_SHORT).show();
+    }
+
+    private void onSwipeRight() {
+        if(r=="cust"){
+            loadcust();
+        }
+        else{
+            loadmeme();
+        }
+
+    }
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        gestureDetector.onTouchEvent(event);
+        return super.onTouchEvent(event);
+    }
 }
 
