@@ -246,8 +246,13 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
         // Store image to default external storage directory
         Uri bmpUri = null;
         try {
-            File file = new File(Environment.getExternalStoragePublicDirectory(
-                    Environment.DIRECTORY_DOWNLOADS), "share_image_" + System.currentTimeMillis() + ".png");
+            String root = Environment.getExternalStoragePublicDirectory(
+                    Environment.DIRECTORY_DOWNLOADS).toString();
+            File myDir = new File(root + "/.Sabreddits");
+            if (!myDir.exists()) {
+                myDir.mkdirs();
+            }
+            File file = new File(String.valueOf(myDir), "sabreddit_" + System.nanoTime() + ".png");
             file.getParentFile().mkdirs();
             FileOutputStream out = new FileOutputStream(file);
             bmp.compress(Bitmap.CompressFormat.PNG, 90, out);
