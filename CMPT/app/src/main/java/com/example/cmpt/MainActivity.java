@@ -8,9 +8,12 @@ import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -32,6 +35,8 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -65,9 +70,8 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
 
     ImageView iv;
     ProgressBar progressBar;
-    String s, n,r;
-    Button nxtcust;
-    Integer counter = 0;
+    String s, n, r;
+    boolean done;
     private GestureDetector gestureDetector;
 
     private static final String TAG = "MainActivity";
@@ -77,75 +81,64 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        deleteCache();
+
 
         iv = (ImageView) findViewById(R.id.memeimageView);
         progressBar = (ProgressBar) findViewById(R.id.progressbar);
-        nxtcust = (Button) findViewById(R.id.nextbutton);
-
-
+        @SuppressLint("WrongConstant") SharedPreferences sh
+                = getSharedPreferences("MySharedPref",
+                MODE_APPEND);
+            boolean q=sh.getBoolean("done",false);
+            done=q;
+        setrules();
+        deleteCache();
         loadmeme();
-
-        if (counter == 0) {
-            nxtcust.setEnabled(false);
-        }
-        nxtcust.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                loadcust();
-            }
-        });
 
 
         gestureDetector = new GestureDetector(this);
     }
 
-    public void deleteCache() {
-        FileUtils.deleteQuietly(this.getCacheDir());
+    public void setrules() {
+
+
+        if (done == false) {
+            View checkBoxView = View.inflate(this, R.layout.checkbox, null);
+            CheckBox checkBox = (CheckBox) checkBoxView.findViewById(R.id.checkbox);
+            checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    done = true;
+                    SharedPreferences sh
+                            = getSharedPreferences("MySharedPref",
+                            MODE_PRIVATE);
+                    SharedPreferences.Editor myEdit
+                            = sh.edit();
+                    myEdit.putBoolean("done", done);
+                    myEdit.commit();
+                }
+            });
+            checkBox.setText("Don't Show it Again");
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("How To...")
+                    .setMessage("\n\nSwipe Up *SHARE IMAGE*\n" +
+                            "Swipe Down *DOWNLOAD IMAGE*\n" +
+                            "Swipe Left *MEMEs*\n" +
+                            "Swipe Down *NEXT IMAGE*\n"+
+                            "Top Right button *SUBREDDDIT SEARCH*\n" )
+                    .setView(checkBoxView)
+                    .setCancelable(false)
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.dismiss();
+                        }
+                    }).show();
+
+        }
     }
 
-    public void loadnsfw() {
-        RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "https://meme-api.herokuapp.com/gimme/nsfw";
-        progressBar.setVisibility(View.VISIBLE);
-
-// Request a string response from the provided URL.
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        try {
-                            String url = response.getString("url");
-                            s = url;
-                            Glide.with(MainActivity.this).load(url).listener(new RequestListener<Drawable>() {
-                                @Override
-                                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                                    progressBar.setVisibility(View.GONE);
-                                    return false;
-                                }
-
-                                @Override
-                                public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                                    progressBar.setVisibility(View.GONE);
-                                    return false;
-                                }
-                            }).into(iv);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-
-                        Toast.makeText(MainActivity.this, "Cant Load Image.... Try Again", Toast.LENGTH_SHORT).show();
-                        progressBar.setVisibility(View.GONE);
-                    }
-                });
-
-// Add the request to the RequestQueue.
-        queue.add(jsonObjectRequest);
+    public void deleteCache() {
+        FileUtils.deleteQuietly(this.getCacheDir());
     }
 
 
@@ -190,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
 
 // Add the request to the RequestQueue.
         queue.add(jsonObjectRequest);
-        r="meme";
+        r = "meme";
     }
 
     public void loadcust() {
@@ -235,7 +228,7 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
 
 // Add the request to the RequestQueue.
         queue.add(jsonObjectRequest);
-        r="cust";
+        r = "cust";
     }
 
 
@@ -348,10 +341,6 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
                     public void onClick(DialogInterface dialog, int which) {
                         n = input.getText().toString();
                         loadcust();
-                        counter++;
-                        if (counter == 1) {
-                            nxtcust.setEnabled(true);
-                        }
                     }
                 });
                 builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -371,14 +360,6 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
                 return super.onOptionsItemSelected(item);
 
         }
-    }
-
-    public void nextmeme(View view) {
-        loadmeme();
-    }
-
-    public void nextnfsw(View view) {
-        loadnsfw();
     }
 
 
@@ -473,17 +454,18 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
 
     private void onSwipeLeft() {
         Toast.makeText(this, "Back To Memes", Toast.LENGTH_SHORT).show();
+        loadmeme();
     }
 
     private void onSwipeRight() {
-        if(r=="cust"){
+        if (r == "cust") {
             loadcust();
-        }
-        else{
+        } else {
             loadmeme();
         }
 
     }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         gestureDetector.onTouchEvent(event);

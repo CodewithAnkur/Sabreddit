@@ -12,7 +12,6 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/sharebutton"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -28,60 +27,7 @@
         app:layout_constraintTop_toTopOf="@id/memeimageView" />
 
 
-    <Button
-        android:id="@+id/sharebutton"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:backgroundTint="@android:color/holo_purple"
-        android:onClick="sharememe"
-        android:padding="20dp"
-        android:text="@string/share"
-        android:textColor="#FFFFFF"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@id/nextmeme" />
 
-    <Button
-        android:id="@+id/nextmeme"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:backgroundTint="#2196F3"
-        android:onClick="nextmeme"
-        android:text="@string/meme"
-        android:textColor="#FFFFFF"
-        android:textSize="18sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toRightOf="@id/sharebutton"
-        app:layout_constraintRight_toLeftOf="@id/guideline"
-        app:layout_constraintTop_toTopOf="@id/sharebutton" />
-
-    <Button
-        android:id="@+id/nextbutton"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:backgroundTint="#2196F3"
-        android:text="@string/next"
-        android:textColor="#FFFFFF"
-        android:textSize="18sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toRightOf="@id/nextbutton2"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/memeimageView" />
-
-    <Button
-        android:id="@+id/nextbutton2"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:backgroundTint="#D7FF9800"
-        android:onClick="nextnfsw"
-        android:text="@string/NSFW"
-        android:textColor="#FFFFFF"
-        android:textSize="18sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="@id/guideline"
-        app:layout_constraintRight_toLeftOf="@id/nextbutton"
-        app:layout_constraintTop_toBottomOf="@id/memeimageView" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline"
