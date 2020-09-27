@@ -33,6 +33,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 
 import com.android.volley.Request;
@@ -73,13 +74,16 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        deleteCache();
+
         iv=(ImageView) findViewById(R.id.memeimageView);
         progressBar=(ProgressBar)findViewById(R.id.progressbar);
         nxtcust=(Button)findViewById(R.id.nextbutton);
+
+
+
+
         loadmeme();
-
-
-
 
         if(counter==0){
            nxtcust.setEnabled(false);
@@ -92,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        deleteCache();
+
 
 
     }
@@ -214,6 +218,7 @@ public class MainActivity extends AppCompatActivity {
                                     return false;
                                 }
                             }).into(iv);
+
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -221,7 +226,8 @@ public class MainActivity extends AppCompatActivity {
                 }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-
+                        Toast.makeText(MainActivity.this, "Subreddit Does Not exist or Network Error", Toast.LENGTH_SHORT).show();
+                        progressBar.setVisibility(View.GONE);
                     }
                 });
 
